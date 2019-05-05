@@ -1,74 +1,270 @@
+Sub StockMarket():
+
+'Write "Ticker" and "Stock Volume" in Cells H1 and I1
+Range("H1").Value = "Ticker"
+Range("I1").Value = "Yearly Change"
+Range("J1").Value = "Percent Change"
+Range("K1").Value = "Stock Volume"
+
+'Declare total stock value and set an initial value of 0 for the variable
+Dim Total_Stock_Volume As Double
+Total_Stock_Volume = 0
+
+Dim Stock_Initial_Value As Single
+Dim Stock_End_Value As Single
+
+'Declare yearly stock change
+Dim Yearly_Change As Single
+
+
+'Declare the Annual Percentage Change
+Dim Percent_Change As Single
 Sub StockAnalysis():
 
-'-----------------------------------------------
-'This portion of the code will initialize all of the variables
-'-----------------------------------------------
-Dim Stock_Name As String
+Dim ws As Worksheet
 
-Dim Stock_Volume As Double
-Stock_Volume = 0
+For Each ws In ThisWorkbook.Worksheets
 
-Dim Row_Counter As Double
-Row_Counter = 0
-
-Dim Summary_Table_Row As Integer
-Summary_Table_Row = 2
-
-'find last row
-lastrow = Cells(Rows.Count, 1).End(xlUp).Row
-
-
-'-----------------------------------------------
-'This portion of the code is to set up the summary table
-'-----------------------------------------------
-
-'set up Ticker and Annual Volume in columns H & I
-Cells(1, 8).Value = "Ticker"
-Cells(1, 9).Value = "Annual Volume"
-
-
-
-
-
-'----------------------------------------------------------
-'This portion of the code will go through each row in the spreadsheet
-'----------------------------------------------------------
-For i = 2 To lastrow
-
-
-'This portion of the code is to indicate a change in the stock or ticker
-'----------------------------------------------------------
-    If Cells(i, 1).Value <> Cells(i + 1, 1).Value Then
+        '-----------------------------------------------
+        'This portion of the code will initialize all of the variables
+        '-----------------------------------------------
+        Dim Stock_Name As String
         
-        'Assign the ticker value before moving to the next ticker
-        Stock_Name = Cells(i, 1).Value
-        
-        'Add the value of the last day to the total Annual stock
-        Stock_Volume = Stock_Volume + Cells(i, 7).Value
-        
-        'Copy the ticker to the Summary Table
-        Range("H" & Summary_Table_Row).Value = Stock_Name
-        
-        'Copy the total annual stock price to the summary table
-        Range("I" & Summary_Table_Row).Value = Stock_Volume
-        
-        'Go to the next row in the summary table
-        Summary_Table_Row = Summary_Table_Row + 1
-        
-        'reset annual volume total
+        Dim Stock_Volume As Double
         Stock_Volume = 0
+        
+        Dim Row_Counter As Double
+        Row_Counter = 0
+        
+        Dim Yearly_Initial_Value As Double
+        Yearly_Initial_Value = 0
+        
+        Dim Yearly_Final_Value As Double
+        Yearly_Final_Value = 0
+        
+        Dim Yearly_Change As Double
+        Yearly_Change = 0
+        
+        Dim Percent_Change As Double
+        Percent_Change = 0
+        
+        Dim Format_Percent_Change As String
+        
+        Dim Summary_Table_Row As Integer
+        Summary_Table_Row = 2
+        
+        
+        'find last row
+        lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        
+        
+        '-----------------------------------------------
+        'This portion of the code is to set up the summary table
+        '-----------------------------------------------
+        
+        'set up Ticker and Annual Volume in columns H & I
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Annual Volume"
+        ws.Cells(1, 11).Value = "Yearly Change"
+        ws.Cells(1, 12).Value = "Percent Change"
+        
+        
+        '----------------------------------------------------------
+        'This portion of the code will go through each row in the spreadsheet
+        '----------------------------------------------------------
+        For i = 2 To lastrow
+        
+        'This portion of the code is to indicate a change in the stock or ticker
+        '----------------------------------------------------------
+            If ws.Cells(i, 1).Value <> ws.Cells(i + 1, 1).Value Then
+                
+                'Assign the ticker value before moving to the next ticker
+                Stock_Name = ws.Cells(i, 1).Value
+                
+                'Add the value of the last day to the total Annual stock
+                Stock_Volume = Stock_Volume + ws.Cells(i, 7).Value
+                                
+                For Stock_Row = 1 To Row_Counter
+                
+                    If Yearly_Initial_Value = 0 Then
+                    
+                        Yearly_Initial_Value = ws.Cells(i - Row_Counter + 1, 3).Value
+                        
+                    Else
+                    
+                    'Calculate the value of the stock at the beginning and the end of the year
+                    Yearly_Initial_Value = ws.Cells(i - Row_Counter, 3).Value
+                
+                    End If
+                    
+                Next Stock_Row
+                
+                Yearly_Final_Value = ws.Cells(i, 6).Value
+                               
+                If Yearly_Initial_Value = Yearly_Final_Value Then
+                
+                    Yearly_Change = 0
+                    Percent_Change = 0
+                    
+                End If
+                
+                
+                'Calculate the Annual Stock Change
+                Yearly_Change = Yearly_Final_Value - Yearly_Initial_Value
+                
+                'calculate the annual percentage change
+                Percent_Change = (Yearly_Final_Value - Yearly_Initial_Value) / Yearly_Initial_Value
+                Format_Percent_Change = Format(Percent_Change, "Percent")
+                    
 
-'This portion of the code is to indicate no change in the stock or ticker
-'-----------------------------------------------------------
-    Else
+                
+                'Copy the ticker to the Summary Table
+                ws.Range("I" & Summary_Table_Row).Value = Stock_Name
+                
+                'Copy the total annual stock price to the summary table
+                ws.Range("J" & Summary_Table_Row).Value = Stock_Volume
+                
+                'copy the stocks yearly change to the summary table
+                ws.Range("K" & Summary_Table_Row).Value = Yearly_Change
+                
+                'copy the value of percentage change to the summary table
+                ws.Range("L" & Summary_Table_Row).Value = Format_Percent_Change
+                'Go to the next row in the summary table
+                Summary_Table_Row = Summary_Table_Row + 1
+                
+                'reset annual volume total
+                Stock_Volume = 0
+                
+                Row_Counter = 0
         
-        Stock_Volume = Stock_Volume + Cells(i, 7).Value
-        
-    End If
+        'This portion of the code is to indicate no change in the stock or ticker
+        '-----------------------------------------------------------
+            Else
+                
+                Stock_Volume = Stock_Volume + ws.Cells(i, 7).Value
+                
+                'count the number of rows for each ticker
+                Row_Counter = Row_Counter + 1
+                
+            End If
+          
+          
+        Next i
+
+    'Find last row of the summary table
+    lastrow_Summary = ws.Cells(Rows.Count, 11).End(xlUp).Row
     
-Next i
+    '-------------------------------------------------------------------------------------
+    'This section of the code will set up the table for greatest increase, decrease, and total volume change
+    ws.Range("P1").Value = "Ticker"
+    ws.Range("Q1").Value = "Value"
+    ws.Range("O2").Value = "Greatest % Increase"
+    ws.Range("O3").Value = "Greatest % Decrease"
+    ws.Range("O4").Value = "Greatest Total Volume"
+    
+    Dim Max_Percentage_Increase As Double
+    Max_Percentage_Increase = 0
+    
+    Dim Max_Percentage_Decrease As Double
+    Max_Percentage_Decrease = 0
 
+    'This portion of the code will use color conditioning to determine the positive or negative net yearly change
+    '------------------------------------------------------------------------------------------
+    
+    'This for loop looks through the yearly change and will paint the cells accordingly
+    For j = 2 To lastrow_Summary
+
+       'paint the cells in green if the yearly change value for the stock is positive
+        If ws.Cells(j, 11).Value > 0 Then
+        
+            ws.Cells(j, 11).Interior.ColorIndex = 4
+        
+        'paint the cells in yellow if the yearly change value for the stock is zero
+        ElseIf ws.Cells(j, 11).Value = 0 Then
+     
+            ws.Cells(j, 11).Interior.ColorIndex = 6
+            
+        'paint the cells in red if the yearly change value for the stock is negative
+        Else
+            
+            ws.Cells(j, 11).Interior.ColorIndex = 3
+            
+        End If
+    
+    Next j
+
+Next ws
 
 End Sub
 
 
+
+
+
+
+
+'Declare a variable for each stocks name
+Dim Stock_Name As String
+
+'declare a variable tfor summary table's row counter with an initial value of 2
+Dim Summary_Row_Assignment As Integer
+Summary_Row_Assignment = 2
+
+Dim Row_Counter As Long
+Row_Counter = 1
+
+
+'Find Last Row
+lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+
+'for the rows 2 to the last row
+For i = 2 To lastrow
+    
+    'If the data for a given stock is finished
+    If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+    
+        Stock_End_Value = Cells(i, 6).Value
+        Stock_Initial_Value = Cells(i - Row_Counter, 3)
+        
+        'Calulate stock annual change and percentage change
+        Yearly_Change = Stock_Initial_Value - Stock_End_Value
+        Percent_Change = (Stock_Initial_Value - Stock_End_Value) / Stock_Initial_Value
+        
+    
+        'add the stock volume of the last row to the total stock volume
+        Total_Stock_Volume = Total_Stock_Volume + Cells(i, 7).Value
+        
+        'identify the stocks name
+        Stock_Name = Cells(i, 1).Value
+        
+        'place the stocks' name in the summary table ticker
+        Range("H" & Summary_Row_Assignment).Value = Stock_Name
+        
+        'place the stock's annual total change in the column I in the summary table
+        Range("I" & Summary_Row_Assignment).Value = Yearly_Change
+        
+        'place the stock annual percentage change in the for J in the summary table
+        Range("J" & Summary_Row_Assignment).Value = Percent_Change
+        
+        'place the stocks' total in the summary table Stock Volume
+        Range("K" & Summary_Row_Assignment).Value = Total_Stock_Volume
+        
+        'Go to the next row for the summary table assignment
+        Summary_Row_Assignment = Summary_Row_Assignment + 1
+        
+        'Reset the value for Stock Volume
+        Total_Stock_Volume = 0
+        
+        Row_Counter = 0
+        
+    Else
+        
+        Total_Stock_Volume = Total_Stock_Volume + Cells(i, 7).Value
+        
+        Row_Counter = Row_Counter + 1
+        
+    End If
+
+Next i
+    
+End Sub
