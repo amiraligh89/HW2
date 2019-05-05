@@ -1,0 +1,74 @@
+Sub StockAnalysis():
+
+'-----------------------------------------------
+'This portion of the code will initialize all of the variables
+'-----------------------------------------------
+Dim Stock_Name As String
+
+Dim Stock_Volume As Double
+Stock_Volume = 0
+
+Dim Row_Counter As Double
+Row_Counter = 0
+
+Dim Summary_Table_Row As Integer
+Summary_Table_Row = 2
+
+'find last row
+lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+
+
+'-----------------------------------------------
+'This portion of the code is to set up the summary table
+'-----------------------------------------------
+
+'set up Ticker and Annual Volume in columns H & I
+Cells(1, 8).Value = "Ticker"
+Cells(1, 9).Value = "Annual Volume"
+
+
+
+
+
+'----------------------------------------------------------
+'This portion of the code will go through each row in the spreadsheet
+'----------------------------------------------------------
+For i = 2 To lastrow
+
+
+'This portion of the code is to indicate a change in the stock or ticker
+'----------------------------------------------------------
+    If Cells(i, 1).Value <> Cells(i + 1, 1).Value Then
+        
+        'Assign the ticker value before moving to the next ticker
+        Stock_Name = Cells(i, 1).Value
+        
+        'Add the value of the last day to the total Annual stock
+        Stock_Volume = Stock_Volume + Cells(i, 7).Value
+        
+        'Copy the ticker to the Summary Table
+        Range("H" & Summary_Table_Row).Value = Stock_Name
+        
+        'Copy the total annual stock price to the summary table
+        Range("I" & Summary_Table_Row).Value = Stock_Volume
+        
+        'Go to the next row in the summary table
+        Summary_Table_Row = Summary_Table_Row + 1
+        
+        'reset annual volume total
+        Stock_Volume = 0
+
+'This portion of the code is to indicate no change in the stock or ticker
+'-----------------------------------------------------------
+    Else
+        
+        Stock_Volume = Stock_Volume + Cells(i, 7).Value
+        
+    End If
+    
+Next i
+
+
+End Sub
+
+
